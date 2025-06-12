@@ -121,9 +121,26 @@ std::string executeScript(std::string script, bool sandbox_libs = false)
     return result.empty() ? "" : result;
 }
 
+#include <lstate.h>
+#include <lvm.h>
+#include <lgc.h>
 #include <Flow/Flow.hpp>
 #include <Luau/Bytecode.h>
 #include <iostream>
+
+/**
+ * @brief Simulates VM_PROTECT
+ *
+ * @param L
+ * @param ctx
+ * @param f
+ */
+void ProtectedCall(lua_State* L, ExecutionContext ctx, std::function<void()> f)
+{
+    L->ci->savedpc = *ctx.pc;
+    f();
+    *ctx.base = L->base;
+}
 
 void vformatAppend(std::string &ret, const char *fmt, va_list args)
 {
@@ -596,8 +613,19 @@ public:
 
 #undef OP_CHECK
 
-#include <lstate.h>
+bool pre_op(lua_State* L, ExecutionContext ctx)
+{
+    std::uint32_t* pc = *ctx.pc;
+    if (LUAU_INSN_OP(*pc) >= LOP__COUNT)
+        return true;
 
+    auto op = Opcode::getOpLen(Opcode::op2enum(*pc)) == 2 ? Opcode::create(*pc, *(pc + sizeof(std::uint32_t))) : Opcode::create(*pc);
+    std::cout << op.name() << std::endl;
+    
+    return true;
+}
+
+/**
 bool pre_op(lua_State *L, std::uint32_t* pc)
 {
     if (LUAU_INSN_OP(*pc) >= LOP__COUNT)
@@ -621,7 +649,8 @@ bool pre_op(lua_State *L, std::uint32_t* pc)
             TValue* kv = &p->k[op.getAux()];
             if (ttisstring(kv))
             {
-                
+                TValue g;
+                sethvalue(L, &g, cl->env);
             }
 
         }
@@ -634,11 +663,11 @@ void sort_op(lua_State *L, std::uint32_t* pc)
 {
     
 }
-
+*/
 int main()
 {
     Flow::getInstance().set_pre_op(pre_op);
-    Flow::getInstance().set_post_op(sort_op);
+    //Flow::getInstance().set_post_op(sort_op);
     executeScript("print('hello world !')");
     return 0;
 }

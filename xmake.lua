@@ -1,7 +1,7 @@
 
 add_rules("mode.debug", "mode.release")
 
-local luau_dir = path.join("C:\\Users\\Kumusta\\Documents\\GitHub\\luau\\")
+local luau_dir = path.join("C:\\Users\\Admin\\Documents\\GitHub\\luau\\")
 
 package("luau")
 
