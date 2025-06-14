@@ -616,13 +616,65 @@ public:
 bool pre_op(lua_State* L, ExecutionContext ctx)
 {
     std::uint32_t* pc = *ctx.pc;
-    if (LUAU_INSN_OP(*pc) >= LOP__COUNT)
+    std::cout << Opcode::op2str(Opcode::op2enum(*pc)) << std::endl;
+    std::uint32_t insn = *pc;
+    if (Opcode::getOpLen(Opcode::op2enum(insn)) == 2)
+    {
+        std::uint32_t aux = *(pc + 1);
+        //std::cout << aux << std::endl;
+        lua_TValue* kv = &*ctx.k[aux];
+        //std::cout << luaT_typenames[kv->tt] << std::endl;
+        if (ttisstring(kv))
+        {
+            const char* str = svalue(kv);
+            std::cout << "aux string : " << str << std::endl;
+        }
+    }
+    /*std::uint32_t* pc = *ctx.pc;
+    std::cout << std::hex << pc << " || " << *pc << std::endl;
+    std::uint32_t insn = *pc++;
+    std::cout << insn << std::endl;
+    if (LUAU_INSN_OP(insn) >= LOP__COUNT)
         return true;
+    std::cout << Opcode::op2str(Opcode::op2enum(insn)) << std::endl;
+    if (Opcode::getOpLen(Opcode::op2enum(insn)) == 2) 
+    {
+        std::uint32_t aux = *pc++;
+        std::cout << "sizek " << (*ctx.cl)->l.p->sizek << std::endl;
+        std::cout << "aux : " << aux << std::endl;
+        lua_TValue* kv = &*ctx.k[aux];
+        std::cout << luaT_typenames[kv->tt] << std::endl;
+        pc--;
+    }
+    pc--;*/
+    //Opcode op = Opcode::getOpLen(Opcode::op2enum(*pc)) == 2 ? Opcode::create(*pc, *(pc+sizeof(std::uint32_t))) : Opcode::create(*pc);
+    //std::cout << op.name() << std::endl;
+/*
+    if (op.type() == LOP_GETGLOBAL)
+    {
+        if (isLua(L->ci))
+        {
+            TValue* kv = ctx.k[op.getAux()];
+            StkId ra = ctx.base[op.u.abc.a];
+            if (ttisstring(kv))
+            {
+                TValue g;
+                sethvalue(L, &g, clvalue(L->ci->func)->env);
+                ProtectedCall(L, ctx, [ra,g,kv,L, ctx]() {
+                    luaV_gettable(L, &g, kv, ra);
+                });
 
-    auto op = Opcode::getOpLen(Opcode::op2enum(*pc)) == 2 ? Opcode::create(*pc, *(pc + sizeof(std::uint32_t))) : Opcode::create(*pc);
-    std::cout << op.name() << std::endl;
+                if (ttisfunction(ra))
+                {
+                    std::cout << "function found" << std::endl;
+                }
+            }
+        }
+    }
     
     return true;
+    */
+   return true;
 }
 
 /**
